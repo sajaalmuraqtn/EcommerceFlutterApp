@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "968907424518",
+    "project_id": "storeapp-6db64",
+    "storage_bucket": "storeapp-6db64.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:968907424518:android:e59198df03aa799b1a9487",
+        "android_client_info": {
+          "package_name": "com.example.electrical_store_mobile_app_sqllite"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVdBZzPhSLxyE4T0VxsM2O3iF1egOWMXs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
