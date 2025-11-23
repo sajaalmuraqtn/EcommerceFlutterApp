@@ -1,4 +1,5 @@
 import 'package:electrical_store_mobile_app/helpers/constants.dart';
+import 'package:electrical_store_mobile_app/logic/models/auth/user_session.dart';
 import 'package:electrical_store_mobile_app/screens/auth/loginscreen.dart';
 import 'package:electrical_store_mobile_app/screens/userscreens/homeScreen.dart';
 import 'package:electrical_store_mobile_app/screens/adminproductscreens/productsview.dart';
@@ -18,10 +19,9 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
  
   Future<void> checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    bool isLoggedIn = prefs.getBool("isLoggedIn") ?? false;
-    String role = prefs.getString("userEmail") ?? "admin@gmail.com"; // admin or user
+    bool isLoggedIn = await UserSession.isLoggedIn() ?? false;
+    String role =  await UserSession.getUserEmail() ?? "admin@gmail.com"; // admin or user
 
     if (isLoggedIn) {
       // المستخدم مسجل دخول

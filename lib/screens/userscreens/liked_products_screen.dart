@@ -1,10 +1,11 @@
 import 'package:electrical_store_mobile_app/helpers/constants.dart';
+import 'package:electrical_store_mobile_app/logic/controller/likecontroller.dart';
+import 'package:electrical_store_mobile_app/logic/models/auth/user_session.dart';
 import 'package:flutter/material.dart';
 import 'package:electrical_store_mobile_app/logic/controller/product_controller.dart';
 import 'package:electrical_store_mobile_app/widgets/homeWidgets/productCard.dart';
 import 'package:electrical_store_mobile_app/logic/models/product.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+ 
 class LikedProductsScreen extends StatefulWidget {
   const LikedProductsScreen({super.key});
 
@@ -16,7 +17,7 @@ class _LikedProductsScreenState extends State<LikedProductsScreen> {
   final ProductController productController = ProductController();
   List<Product> products = [];
   bool isLoading = true;
-  int? user_id;
+  String? user_id;
 
   @override
   void initState() {
@@ -25,21 +26,21 @@ class _LikedProductsScreenState extends State<LikedProductsScreen> {
   }
 
   Future<void> _initialize() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    user_id = prefs.getInt("user_id");
+    
+    user_id =  await UserSession.getUserId() ;
     await loadLiked();
   }
 
   Future<void> loadLiked() async {
     if (user_id == null) return;
     setState(() => isLoading = true);
-    products = await productController.getLikedProducts(user_id!);
+    products = await LikeController.getLikedProducts(user_id!);
     setState(() => isLoading = false);
   }
 
   Future<void> handleLike(Product p) async {
     if (user_id == null) return;
-    await productController.toggleLike(user_id!, p);
+    await LikeController.toggleLike(user_id!, p);
     await loadLiked(); // إعادة تحميل القائمة بعد Like/Unlike
   }
 

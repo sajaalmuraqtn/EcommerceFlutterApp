@@ -19,28 +19,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
- void register() async {
+void register() async {
   if (_formKey.currentState!.validate()) {
     User user = User(
       name: nameController.text,
       email: emailController.text,
       password: passwordController.text,
     );
-    UserController controller=  UserController() ;
+    UserController controller = UserController();
 
-    await controller.createUser(user.toMap());
+    bool success = await controller.register(user);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("تم إنشاء الحساب بنجاح")),
-    );
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
-    );
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("تم إنشاء الحساب بنجاح"),backgroundColor: Colors.green),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        
+        SnackBar(content: Text("البريد الإلكتروني موجود مسبقاً"),backgroundColor: Colors.red,),
+      );
+    }
   }
 }
-
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
               ),
+             const SizedBox(height: 20),
 
               // الإيميل
               TextFormField(
@@ -82,6 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return null;
                 },
               ),
+             const SizedBox(height: 20),
 
               // كلمة السر
               TextFormField(
@@ -99,9 +106,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 },
               ),
 
-              SizedBox(height: 25),
+             const SizedBox(height: 50),
 
-              ElevatedButton(onPressed: register, child: Text("تسجيل",style: TextStyle(color: kPrimaryColor),) ),
+              ElevatedButton(onPressed: register, child: Text("تسجيل الحساب",style: TextStyle(color: kPrimaryColor),) ),
             ],
           ),
         ),

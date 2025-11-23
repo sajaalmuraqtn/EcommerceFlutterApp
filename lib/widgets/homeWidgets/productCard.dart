@@ -3,6 +3,8 @@ import 'package:electrical_store_mobile_app/helpers/constants.dart';
 import 'package:electrical_store_mobile_app/logic/controller/product_controller.dart';
 import 'package:electrical_store_mobile_app/logic/models/product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 
 class ProductCard extends StatefulWidget {
   final int itemIndex;
@@ -78,7 +80,7 @@ class _ProductCardState extends State<ProductCard>
                   flex: 4,
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
-                    child: widget.product.image.contains('assets/')? Image.asset(widget.product.image, fit: BoxFit.cover):Image.network(widget.product.image, fit: BoxFit.cover),
+                    child: widget.product.image.contains('assets/')?  Image.asset(widget.product.image, fit: BoxFit.cover):CachedNetworkImage(imageUrl: widget.product.image,fit:  BoxFit.cover)   ,
                   ),
                 ),
 

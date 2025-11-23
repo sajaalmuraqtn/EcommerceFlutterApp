@@ -1,5 +1,7 @@
+import 'package:electrical_store_mobile_app/logic/controller/likecontroller.dart';
+import 'package:electrical_store_mobile_app/logic/models/auth/user_session.dart';
+import 'package:flutter/material.dart';
 import 'package:electrical_store_mobile_app/helpers/constants.dart';
-import 'package:electrical_store_mobile_app/helpers/database_helper.dart';
 import 'package:electrical_store_mobile_app/logic/controller/product_controller.dart';
 import 'package:electrical_store_mobile_app/logic/models/product.dart';
 import 'package:electrical_store_mobile_app/screens/auth/loginscreen.dart';
@@ -7,8 +9,6 @@ import 'package:electrical_store_mobile_app/screens/user/profilescreen.dart';
 import 'package:electrical_store_mobile_app/screens/userscreens/detailsScreen.dart';
 import 'package:electrical_store_mobile_app/screens/userscreens/liked_products_screen.dart';
 import 'package:electrical_store_mobile_app/widgets/homeWidgets/productCard.dart';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,61 +21,55 @@ class _HomeScreenState extends State<HomeScreen> {
   final ProductController productController = ProductController();
   List<Product> products = [];
   bool isLoggedIn = false;
-  int? user_id;
+  String? userId;
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
-      _initializeApp();
-    });
+    _initializeApp();
   }
 
-  // ----------- INITIALIZE APP ----------
   Future<void> _initializeApp() async {
-    await checkLoginStatus();
+    await _checkLoginStatus();
     await _loadProducts();
   }
 
-  // ----------- CHECK LOGIN STATUS ----------
-  Future<void> checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isLoggedIn = prefs.getBool("isLoggedIn") ?? false;
-      user_id = prefs.getInt("user_id");
-    });
-  }
+Future<void> _checkLoginStatus() async {
+  isLoggedIn = await UserSession.isLoggedIn();
+  userId = await UserSession.getUserId();
 
-  // ----------- LOAD PRODUCTS ----------
+  setState(() {}); // تحديث الواجهة بعد الحصول على القيم
+  print("issss login $isLoggedIn");
+}
   Future<void> _loadProducts() async {
     setState(() => _loading = true);
 
-    if (isLoggedIn && user_id != null) {
-      products = await productController.readAllProducts(userId: user_id);
-    } else {
-      products = await productController.readAllProducts();
+    try {
+      final id = userId?.isNotEmpty == true ? userId : null;
+      products = await productController.readAllProducts(userId: id);
+    } catch (e) {
+      debugPrint("Error loading products: $e");
+      products = [];
     }
 
     setState(() => _loading = false);
   }
 
-  // ----------- LIKE HANDLER (بدون إعادة تحميل من DB) ----------
-Future<void> handleLike(Product p) async {
-  if (user_id == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("يجب تسجيل الدخول لإضافة إعجاب")),
-    );
-    return;
+  Future<void> _handleLike(Product p) async {
+    if (userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("يجب تسجيل الدخول لإضافة إعجاب")),
+      );
+      return;
+    }
+
+    await LikeController.toggleLike(userId!, p);
+
+    setState(() {
+      p.isLiked = !p.isLiked;
+    });
   }
-
-  await productController.toggleLike(user_id!, p);
-
-  setState(() {
-    p.isLiked = !p.isLiked; // تحديث مباشر بدون إعادة تحميل DB
-  });
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +84,7 @@ Future<void> handleLike(Product p) async {
           isLoggedIn
               ? "تصفح المنتجات المتنوعة"
               : "مرحباً بكم في متجرنا الإلكتروني",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: [
           if (!isLoggedIn)
@@ -98,44 +92,44 @@ Future<void> handleLike(Product p) async {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => LoginScreen()),
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
                 ).then((_) => _initializeApp());
               },
-              icon: Icon(Icons.login, color: Colors.white),
+              icon: const Icon(Icons.login, color: Colors.white),
             ),
           if (isLoggedIn) ...[
             IconButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => ProfileScreen()),
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
                 );
               },
-              icon: Icon(Icons.person, color: Colors.white),
+              icon: const Icon(Icons.person, color: Colors.white),
             ),
             IconButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => LikedProductsScreen()),
+                  MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
                 );
               },
               icon: Stack(
                 children: [
-                  Icon(Icons.favorite, color: Colors.white),
+                  const Icon(Icons.favorite, color: Colors.white),
                   if (likedCount > 0)
                     Positioned(
                       right: 0,
                       top: 0,
                       child: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
                         child: Text(
                           likedCount.toString(),
-                          style: TextStyle(color: Colors.white, fontSize: 12),
+                          style: const TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
                     ),
@@ -149,13 +143,13 @@ Future<void> handleLike(Product p) async {
         bottom: false,
         child: Column(
           children: [
-            SizedBox(height: kDefaultPadding / 2),
+            const SizedBox(height: kDefaultPadding / 2),
             Expanded(
               child: Stack(
                 children: [
                   Container(
-                    margin: EdgeInsets.only(top: 70),
-                    decoration: BoxDecoration(
+                    margin: const EdgeInsets.only(top: 70),
+                    decoration: const BoxDecoration(
                       color: kBackgroundColor,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(40),
@@ -163,36 +157,29 @@ Future<void> handleLike(Product p) async {
                       ),
                     ),
                   ),
-
-                  // ----------- LOADING ----------
-                  if (_loading)
-                    Center(
-                      child: CircularProgressIndicator(color: kPrimaryColor),
-                    )
-                  // ----------- NO PRODUCTS ----------
-                  else if (products.isEmpty)
-                    Center(child: Text("لا توجد منتجات"))
-                  // ----------- PRODUCTS LIST ----------
-                  else
-                    ListView.builder(
-                      itemCount: products.length,
-                      itemBuilder: (context, index) {
-                        final p = products[index];
-                        return ProductCard(
-                          itemIndex: index,
-                          product: p,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DetailsScreen(product: p),
-                              ),
-                            ).then((_) => _loadProducts());
-                          },
-                          onLikeChanged: () => handleLike(p),
-                        );
-                      },
-                    ),
+                  _loading
+                      ? const Center(child: CircularProgressIndicator(color: kPrimaryColor))
+                      : products.isEmpty
+                          ? const Center(child: Text("لا توجد منتجات"))
+                          : ListView.builder(
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                final p = products[index];
+                                return ProductCard(
+                                  itemIndex: index,
+                                  product: p,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DetailsScreen(product: p),
+                                      ),
+                                    ).then((_) => _loadProducts());
+                                  },
+                                  onLikeChanged: () => _handleLike(p),
+                                );
+                              },
+                            ),
                 ],
               ),
             ),

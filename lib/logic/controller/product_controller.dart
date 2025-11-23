@@ -1,32 +1,113 @@
-import '../../helpers/database_helper.dart';
+import 'dart:math';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:electrical_store_mobile_app/helpers/database_helper.dart';
+import 'package:electrical_store_mobile_app/logic/firebaseServices/product.dart';
+import 'package:sqflite/sqflite.dart';
 import '../models/product.dart';
 
 class ProductController {
   final dbHelper = DatabaseHelper.instance;
+  final firebase = FirebaseProductService();
 
-  Future<int> createProduct(Product product) async {
-    final db = await dbHelper.database;
-    return await db.insert('products', product.toMap());
+  // ----------- CHECK INTERNET ------------
+  Future<bool> hasInternet() async {
+    var c = await Connectivity().checkConnectivity();
+    return c != ConnectivityResult.none;
   }
 
-  Future<int> updateProduct(Product product) async {
+  // ----------- ADD PRODUCT ------------
+  Future<void> createProduct(Product product) async {
     final db = await dbHelper.database;
-    return await db.update(
-      'products',
-      product.toMap(),
-      where: 'id = ?',
-      whereArgs: [product.id],
+    bool online = await hasInternet();
+
+    // إذا ما فيه id، ننشئ واحد
+    final String id = product.id!.isEmpty
+        ? "p_${Random().nextInt(999999999)}"
+        : product.id!;
+
+    final data = product.toMap()..["id"] = id;
+
+    if (online) {
+      await firebase.addProduct(data);
+      data["syncStatus"] = 0;
+    } else {
+      data["syncStatus"] = 1;
+    }
+
+    await db.insert(
+      "products",
+      data,
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
-  Future<int> deleteProduct(int id) async {
+  // ----------- UPDATE PRODUCT ------------
+  Future<void> updateProduct(Product product) async {
     final db = await dbHelper.database;
-    return await db.delete('products', where: 'id = ?', whereArgs: [id]);
+    bool online = await hasInternet();
+
+    final data = product.toMap();
+
+    if (online) {
+      await firebase.updateProduct(data);
+      data["syncStatus"] = 0;
+    } else {
+      data["syncStatus"] = 1;
+    }
+
+    await db.update("products", data, where: "id = ?", whereArgs: [product.id]);
   }
 
-  // --------------------- SUPER FAST PRODUCTS + LIKES ----------------------
-  Future<List<Product>> readAllProducts({int? userId}) async {
+  // ----------- DELETE PRODUCT ------------
+  Future<void> deleteProduct(String id) async {
     final db = await dbHelper.database;
+    bool online = await hasInternet();
+
+    if (online) {
+      await firebase.deleteProduct(id);
+      await db.delete("products", where: "id = ?", whereArgs: [id]);
+    } else {
+      // نحذفه محلياً فقط
+      await db.update(
+        "products",
+        {"syncStatus": 1},
+        where: "id = ?",
+        whereArgs: [id],
+      );
+    }
+  }
+
+  Future<List<Product>> readAllProducts({String? userId}) async {
+    bool online = await hasInternet();
+
+    if (online) {
+      try {
+        // Fetch from Firestore
+        final products = await firebase.fetchProducts();
+
+        // Save to local SQLite
+        final db = await dbHelper.database;
+        for (var p in products) {
+          await db.insert(
+            "products",
+            p.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+
+        return products;
+      } catch (e) {
+        print("Error fetching from Firestore: $e");
+        return _getProductsFromLocal(userId);
+      }
+    } else {
+      return _getProductsFromLocal(userId);
+    }
+  }
+
+  Future<List<Product>> _getProductsFromLocal(String? userId) async {
+    final db = await dbHelper.database;
+    final id = userId?.isNotEmpty == true ? userId : null;
 
     final result = await db.rawQuery("""
       SELECT 
@@ -34,48 +115,31 @@ class ProductController {
         CASE 
           WHEN l.productId IS NOT NULL THEN 1 
           ELSE 0 
-        END as isLiked
+        END AS isLiked
       FROM products p
       LEFT JOIN likes l
-        ON p.id = l.productId AND l.userId = ?
-    """, [userId]);
+        ON l.productId = p.id
+        ${id != null ? "AND l.userId = ?" : ""}
+    """, id != null ? [id] : []);
 
     return result.map((e) => Product.fromMap(e)).toList();
   }
 
-  Future<List<Product>> getLikedProducts(int userId) async {
+
+  // ----------- SYNC OFFLINE DATA ------------
+  Future<void> syncPendingProducts() async {
     final db = await dbHelper.database;
 
-    final result = await db.rawQuery("""
-      SELECT p.*, 1 as isLiked
-      FROM products p
-      INNER JOIN likes l
-        ON p.id = l.productId
-      WHERE l.userId = ?
-    """, [userId]);
+    bool online = await hasInternet();
+    if (!online) return;
 
-    return result.map((e) => Product.fromMap(e)).toList();
-  }
+    final pending = await db.query("products", where: "syncStatus = 1");
 
-  Future<void> toggleLike(int userId, Product product) async {
-    final db = await dbHelper.database;
+    for (var p in pending) {
+      await firebase.addProduct(p);
+      p["syncStatus"] = 0;
 
-    final check = await db.query(
-      "likes",
-      where: "userId = ? AND productId = ?",
-      whereArgs: [userId, product.id],
-    );
-
-    if (check.isEmpty) {
-      await db.insert("likes", {"userId": userId, "productId": product.id});
-      product.isLiked = true;
-    } else {
-      await db.delete(
-        "likes",
-        where: "userId = ? AND productId = ?",
-        whereArgs: [userId, product.id],
-      );
-      product.isLiked = false;
+      await db.update("products", p, where: "id = ?", whereArgs: [p["id"]]);
     }
   }
 }

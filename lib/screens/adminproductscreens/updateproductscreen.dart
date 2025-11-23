@@ -58,6 +58,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
     );
 
     await controller.updateProduct(updated);
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("تم التعديل على المنتج بنجاح"),backgroundColor: Colors.green),
+      );
     Navigator.pop(context, true);
   }
 
@@ -113,7 +116,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 decoration: const InputDecoration(labelText: "رابط الصورة"),
                 validator: (value) {
                   if (value == null || value.isEmpty) return "الرجاء إدخال رابط الصورة";
-                  if (!Uri.tryParse(value)!.isAbsolute) {
+                  if (!Uri.tryParse(value)!.isAbsolute && !value.contains('assets/')) {
                     return "رابط الصورة غير صالح";
                   }
                   return null;

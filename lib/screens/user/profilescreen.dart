@@ -1,10 +1,9 @@
 import 'package:electrical_store_mobile_app/helpers/constants.dart';
-import 'package:electrical_store_mobile_app/logic/models/auth/auth.dart';
+import 'package:electrical_store_mobile_app/logic/firebaseServices/product.dart';
 import 'package:electrical_store_mobile_app/logic/models/auth/user_session.dart';
 import 'package:electrical_store_mobile_app/screens/auth/loginscreen.dart';
 import 'package:flutter/material.dart';
-import 'package:electrical_store_mobile_app/helpers/database_helper.dart';
- 
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -13,29 +12,29 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  User? currentUser;
+  String? userId;
+  String? userName;
+  String? userEmail;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    loadUser();
+    loadUserData();
   }
 
-  void loadUser() async {
-    final id = await UserSession.getUser();
-    if (id != null) {
-      final db = await DatabaseHelper.instance.database;
-      final result = await db.query("users", where: "id = ?", whereArgs: [id]);
+  Future<void> loadUserData() async {
+    userId = await UserSession.getUserId();
+    userName = await UserSession.getUserName();
+    userEmail = await UserSession.getUserEmail();
 
-      if (result.isNotEmpty) {
-        setState(() {
-          currentUser = User.fromMap(result.first);
-        });
-      }
-    }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void logout() async {
+   await FirebaseProductService.syncLikesToFirestore() ; 
     await UserSession.logout();
 
     Navigator.pushAndRemoveUntil(
@@ -48,24 +47,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("الملف الشخصي",style: TextStyle(color: kBackgroundColor),),        backgroundColor: kPrimaryColor,
-),
-      body: currentUser == null
-          ? Center(child: CircularProgressIndicator(color: kPrimaryColor,))
+      appBar: AppBar(
+        title: Text("الملف الشخصي", style: TextStyle(color: kBackgroundColor)),
+        backgroundColor: kPrimaryColor,
+      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator(color: kPrimaryColor))
           : Padding(
               padding: const EdgeInsets.all(70),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("الاسم: ${currentUser!.name}",
+                  Text("الاسم: ${userName ?? 'غير متوفر'}",
                       style: TextStyle(fontSize: 20)),
                   SizedBox(height: 10),
-                  Text("البريد الإلكتروني: ${currentUser!.email}",
+                  Text("البريد الإلكتروني: ${userEmail ?? 'غير متوفر'}",
                       style: TextStyle(fontSize: 18)),
                   SizedBox(height: 50),
                   ElevatedButton(
                     onPressed: logout,
-                    child: Text("تسجيل خروج",style: TextStyle(color: kPrimaryColor),),
+                    child: Text("تسجيل خروج",
+                        style: TextStyle(color: kPrimaryColor)),
                   ),
                 ],
               ),

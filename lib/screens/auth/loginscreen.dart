@@ -20,11 +20,56 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoading = false;
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    UserController controller = UserController();
+    final user = await controller.login(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    setState(() => _isLoading = false);
+
+    if (user != null) {
+      UserSession.saveUser(
+        userId: user["id"],
+        email: user["email"],
+        name: user["name"],
+      );
+
+      if (user['email'] == "admin@gmail.com") {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminProductsScreen()),      (route) => false,
+
+        );
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),      (route) => false,
+
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("فشل تسجيل الدخول")));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("تسجيل الدخول",style: TextStyle(color: kBackgroundColor),),backgroundColor: kPrimaryColor,),
+      appBar: AppBar(
+        title: const Text(
+          "تسجيل الدخول",
+          style: TextStyle(color: kBackgroundColor),
+        ),
+        backgroundColor: kPrimaryColor,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -38,7 +83,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 // البريد الإلكتروني
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(labelText: "البريد الإلكتروني"),
+                  decoration: const InputDecoration(
+                    labelText: "البريد الإلكتروني",
+                  ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -51,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
 
-                const SizedBox(height: 12),
+             const SizedBox(height: 20),
 
                 // كلمة المرور
                 TextFormField(
@@ -69,13 +116,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
 
-                const SizedBox(height: 20),
+             const SizedBox(height: 50),
 
                 _isLoading
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
                         onPressed: _login,
-                        child: const Text("تسجيل الدخول",style: TextStyle(color: kPrimaryColor),),
+                        child: const Text(
+                          "تسجيل الدخول",
+                          style: TextStyle(color: kPrimaryColor),
+                        ),
                       ),
 
                 const SizedBox(height: 20),
@@ -94,13 +144,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: const Text(
                         "إنشاء حساب جديد",
-                        style: TextStyle(fontWeight: FontWeight.bold,color: kPrimaryColor),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: kPrimaryColor,
+                        ),
                       ),
                     ),
                   ],
                 ),
- 
-                 Row(
+
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text("هل تريد الإستمرار كضيف؟"),
@@ -111,9 +164,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           MaterialPageRoute(builder: (_) => HomeScreen()),
                         );
                       },
+                      
                       child: const Text(
                         "تصفح المنتجات",
-                        style: TextStyle(fontWeight: FontWeight.bold,color: kPrimaryColor),
+                        
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: kPrimaryColor,
+                        ),
                       ),
                     ),
                   ],
@@ -124,43 +182,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  // ---------------------------------------
-  // عملية تسجيل الدخول
-  // ---------------------------------------
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    setState(() => _isLoading = true);
-    UserController controller=  UserController() ;
-    final user = await controller.login(email, password);
-
-    setState(() => _isLoading = false);
-
-    if (user != null) {
-
-       UserSession.saveUser(user['id'], user['email']);      
-
-      // admin
-      if (user['email'] == 'admin@gmail.com') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AdminProductsScreen()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("البريد الإلكتروني أو كلمة المرور غير صحيحة")),
-      );
-    }
   }
 }

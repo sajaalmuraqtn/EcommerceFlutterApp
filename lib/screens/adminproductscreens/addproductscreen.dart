@@ -32,7 +32,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String? selectedCategory;
 
   void addproduct() async {
-    if (_formKey.currentState!.validate() == false) return;
+    if (!_formKey.currentState!.validate()) return;
 
     Product p = Product(
       title: title.text,
@@ -44,7 +44,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
     );
 
     await controller.createProduct(p);
-
+     ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("تمت إضافة منتج بنجاح"),backgroundColor: Colors.green),
+      );
     Navigator.pop(context, true);
   }
 
@@ -70,26 +72,24 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 validator: (value) =>
                     value == null || value.isEmpty ? "العنوان مطلوب" : null,
               ),
-                const  SizedBox(height: 10,),
+              const SizedBox(height: 10),
 
               TextFormField(
                 controller: subTitle,
                 decoration: const InputDecoration(labelText: "العنوان الفرعي"),
-                validator: (value) => value == null || value.isEmpty
-                    ? "العنوان الفرعي مطلوب"
-                    : null,
+                validator: (value) =>
+                    value == null || value.isEmpty ? "العنوان الفرعي مطلوب" : null,
               ),
-                const  SizedBox(height: 10,),
+              const SizedBox(height: 10),
 
               TextFormField(
                 controller: description,
                 decoration: const InputDecoration(labelText: "الوصف"),
                 maxLines: 3,
-                validator: (value) => value == null || value.isEmpty
-                    ? "الوصف مطلوب"
-                    : null,
+                validator: (value) =>
+                    value == null || value.isEmpty ? "الوصف مطلوب" : null,
               ),
-                const  SizedBox(height: 10,),
+              const SizedBox(height: 10),
 
               TextFormField(
                 controller: image,
@@ -98,35 +98,31 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   if (value == null || value.isEmpty) {
                     return "رابط الصورة مطلوب";
                   }
-                  if (!Uri.tryParse(value)!.hasAbsolutePath) {
+                  if (!Uri.tryParse(value)!.isAbsolute) {
                     return "الرابط غير صالح";
                   }
                   return null;
                 },
               ),
-                const  SizedBox(height: 10,),
+              const SizedBox(height: 10),
 
               TextFormField(
                 controller: price,
                 decoration: const InputDecoration(labelText: "السعر"),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "السعر مطلوب";
-                  }
-                  if (int.tryParse(value) == null) {
-                    return "السعر يجب أن يكون رقم";
-                  }
+                  if (value == null || value.isEmpty) return "السعر مطلوب";
+                  if (int.tryParse(value) == null) return "السعر يجب أن يكون رقم";
                   return null;
                 },
               ),
-                const  SizedBox(height: 10,),
+              const SizedBox(height: 10),
 
               DropdownButtonFormField(
                 decoration: const InputDecoration(labelText: "التصنيف"),
-                items: categories.map((c) {
-                  return DropdownMenuItem(value: c, child: Text(c));
-                }).toList(),
+                items: categories
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
                 onChanged: (value) => setState(() => selectedCategory = value),
                 validator: (value) =>
                     value == null ? "يجب اختيار تصنيف" : null,
@@ -134,7 +130,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
               const SizedBox(height: 50),
 
-             ElevatedButton(
+              ElevatedButton(
                 onPressed: addproduct,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kPrimaryColor,
