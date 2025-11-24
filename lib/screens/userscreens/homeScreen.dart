@@ -56,8 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     setState(() {
-      print('issss loooogin $isLoggedIn');
-    });
+     });
   }
 
   Future<void> _loadProducts() async {
@@ -116,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-          actions: [
+        actions: [
           if (!isLoggedIn)
             IconButton(
               onPressed: () {

@@ -40,18 +40,23 @@ class _LoginScreenState extends State<LoginScreen> {
         name: user["name"],
       );
 
-      if (user['email'] == "admin@gmail.com") {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const AdminProductsScreen()),      (route) => false,
-
+      if (user != null) {
+        await UserSession.saveUser(
+          userId: user["id"],
+          email: user["email"],
+          name: user["name"],
         );
-      } else {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),      (route) => false,
 
-        );
+        if (user['email'] == "admin@gmail.com") {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const AdminProductsScreen()),
+            (route) => false,
+          );
+        } else {
+          // تمرير true عند العودة للـ HomeScreen لتحديث الحالة
+          Navigator.pop(context, true);
+        }
       }
     } else {
       ScaffoldMessenger.of(
@@ -99,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
 
-             const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
                 // كلمة المرور
                 TextFormField(
@@ -117,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
 
-             const SizedBox(height: 50),
+                const SizedBox(height: 50),
 
                 _isLoading
                     ? const CircularProgressIndicator()
@@ -165,10 +170,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           MaterialPageRoute(builder: (_) => HomeScreen()),
                         );
                       },
-                      
+
                       child: const Text(
                         "تصفح المنتجات",
-                        
+
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: kPrimaryColor,
