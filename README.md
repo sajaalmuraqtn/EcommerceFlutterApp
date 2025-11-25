@@ -37,7 +37,7 @@ Used to build the entire UI and app logic with smooth Material Design components
 
 - Keeping unsynced data until the device reconnects.
 
-
+--
 ## 🧩 How SQLite & Firebase Work Together (Sync System)
 
 The app uses a hybrid Offline-First architecture:
@@ -89,5 +89,19 @@ Used to handle image uploading, returning a secure image URL stored in both SQLi
 - Unlimited transformations.
 
 - Very stable free tier for development.
- 
- 
+
+---
+🔗 **Live Demo:** https://drive.google.com/drive/folders/1P6HWt1SEKlIlLH3Q35dfp5sAq9CSBu5u?usp=drive_link
+
+## 📱 Guist Screens Preview
+
+![App Preview](assets/GuistScreens.png)
+
+## 📱 Admin Screens Preview
+
+![App Preview](assets/AdminScreens.png)
+
+## 📱 User Screens Preview
+
+![App Preview](assets/UserScreens.png)
+
