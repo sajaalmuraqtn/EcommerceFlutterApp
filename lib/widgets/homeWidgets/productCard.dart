@@ -48,12 +48,9 @@ class _ProductCardState extends State<ProductCard>
       curve: Curves.easeOut,
     );
 
-    _initLikeStatus(); // 🔥 تهيئة حالة اللايك وعدد اللايكات
-  }
+    _initLikeStatus(); 
+  } 
 
-  // --------------------------------------------
-  // 🔥 تهيئة حالة اللايك وعدد اللايكات
-  // --------------------------------------------
   Future<void> _initLikeStatus() async {
     final userId = await UserSession.getUserId();
 
@@ -82,9 +79,7 @@ class _ProductCardState extends State<ProductCard>
     });
   }
 
-  // --------------------------------------------
-  // ❤️ عند الضغط على زر Like
-  // --------------------------------------------
+ 
   void onLikePressed() async {
     _controller.forward().then((value) => _controller.reverse());
 
@@ -99,8 +94,7 @@ class _ProductCardState extends State<ProductCard>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // ---------------------- CARD ----------------------
-        InkWell(
+         InkWell(
           onTap: widget.onPressed,
           child: Container(
             margin: const EdgeInsets.symmetric(
@@ -121,8 +115,7 @@ class _ProductCardState extends State<ProductCard>
             ),
             child: Row(
               children: [
-                // IMAGE
-                Expanded(
+                 Expanded(
                   flex: 4,
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -134,8 +127,7 @@ class _ProductCardState extends State<ProductCard>
                           ),
                   ),
                 ),
-                // INFO
-                Expanded(
+                 Expanded(
                   flex: 6,
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
@@ -169,8 +161,7 @@ class _ProductCardState extends State<ProductCard>
           ),
         ),
 
-        // ---------------------- LIKE BUTTON + COUNT ----------------------
-        Positioned(
+         Positioned(
           top: 10,
           left: 25,
           child: checkingLocalLike
@@ -187,8 +178,7 @@ class _ProductCardState extends State<ProductCard>
                       ),
                       child: Row(
                         children: [
-                          // 🔥 عدد اللايكات يظهر دائمًا
-                          Padding(
+                           Padding(
                             padding: const EdgeInsets.only(left: 6),
                             child: Text(
                               likesCount.toString(),
@@ -199,8 +189,7 @@ class _ProductCardState extends State<ProductCard>
                             ),
                           ),
 
-                          // ❤️ القلب
-                          ScaleTransition(
+                           ScaleTransition(
                             scale: _scaleAnimation,
                             child: GestureDetector(
                               onTap: loggedIn
@@ -213,12 +202,12 @@ class _ProductCardState extends State<ProductCard>
                                           : Icons
                                                 .favorite_border) // إذا مسجل دخول
                                     : Icons
-                                          .favorite, // إذا غير مسجل دخول → دائمًا أحمر
+                                          .favorite,
                                 color: loggedIn
                                     ? (isLiked
                                           ? Colors.red
                                           : Colors.grey) // مستخدم مسجل
-                                    : Colors.red, // غير مسجل → أحمر دائمًا
+                                    : Colors.red,// غير مسجل أحمر  
                                 size: 32,
                               ),
                             ),

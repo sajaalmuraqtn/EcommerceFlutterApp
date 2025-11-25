@@ -20,8 +20,7 @@ class _AdminProductsScreenState extends State<AdminProductsScreen> {
 
   Future<bool> checkInternetAndNotify() async {
      final isOnline = await _controller.hasInternet();
-    print("internet isssssssssss $isOnline");
-
+ 
     if (!isOnline) {
       // إظهار رسالة الخطأ إذا لم يكن متصل 
  
