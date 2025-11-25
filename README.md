@@ -20,8 +20,6 @@ It supports both online and offline modes to ensure your data is always safe and
 
 - Check network status using connectivity_plus.
 
-- Clean project architecture: MVC + Controller Pattern.
-
 - Simple, fast, and responsive UI for product management.
 
 ## 📱 Technologies Used
@@ -29,7 +27,7 @@ It supports both online and offline modes to ensure your data is always safe and
 
 Used to build the entire UI and app logic with smooth Material Design components.
 
-## 🔹 SQLite – Local Database
+### 🔹 SQLite – Local Database
 
 ### The local database is responsible for:
 
@@ -44,7 +42,7 @@ Used to build the entire UI and app logic with smooth Material Design components
 
 The app uses a hybrid Offline-First architecture:
 
-### ✔ When Internet is available:
+###  When Internet is available:
 
 - User adds a product.
 
@@ -54,7 +52,7 @@ The app uses a hybrid Offline-First architecture:
 
 - The same data is stored into SQLite with syncStatus = 0.
 
-✔ When Internet is NOT available:
+### When Internet is NOT available:
 
 Product is stored locally only in SQLite with syncStatus = 1.
 
