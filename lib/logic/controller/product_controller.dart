@@ -73,8 +73,7 @@ class ProductController {
     final data = product.toMap()..["id"] = id;
 
     await firebase.addProduct(data);
-    data["syncStatus"] = 0;
-
+ 
     // تخزين البيانات محليا sqllite بعد نجاح رفعها على الإنترنت
     await db.insert(
       "products",
