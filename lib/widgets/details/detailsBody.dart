@@ -53,14 +53,18 @@ class Detailsbody extends StatelessWidget {
             ],
           ),
         ),
-        Container(
-          margin: EdgeInsets.symmetric(vertical: kDefaultPadding/2),
-          padding: EdgeInsets.symmetric(horizontal: kDefaultPadding*1.5,vertical: kDefaultPadding/2),
-          child: Text(product.description,
-          style: TextStyle(
-                fontSize: 19.0,
-                 color: Colors.white
-              ),
+        Expanded(
+          child: Container(
+            margin: EdgeInsets.symmetric(vertical: kDefaultPadding/2),
+            padding: EdgeInsets.symmetric(horizontal: kDefaultPadding*1.5,vertical: kDefaultPadding/2),
+            child: ListView(
+              children:[ Text(product.description,
+              style: TextStyle(
+                    fontSize: 19.0,
+                     color: Colors.white
+                  ),
+              ),]
+            ),
           ),
         )
       ],

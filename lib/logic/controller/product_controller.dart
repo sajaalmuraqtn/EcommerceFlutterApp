@@ -187,19 +187,5 @@ class ProductController {
     return result.map((e) => Product.fromMap(e)).toList();
   }
 
-  Future<void> syncPendingProducts() async {
-    final db = await dbHelper.database;
-
-    bool online = await hasInternet();
-    if (!online) return;
-
-    final pending = await db.query("products", where: "syncStatus = 1");
-
-    for (var p in pending) {
-      await firebase.addProduct(p);
-      p["syncStatus"] = 0;
-
-      await db.update("products", p, where: "id = ?", whereArgs: [p["id"]]);
-    }
-  }
+   
 }

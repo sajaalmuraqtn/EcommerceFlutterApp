@@ -165,7 +165,7 @@ class _ProductCardState extends State<ProductCard>
           top: 10,
           left: 25,
           child: checkingLocalLike
-              ? const CircularProgressIndicator(strokeWidth: 2)
+              ? const CircularProgressIndicator(strokeWidth: 2,color:kPrimaryColor)
               : FutureBuilder<bool>(
                   future: UserSession.isLoggedIn(),
                   builder: (context, snapshot) {
